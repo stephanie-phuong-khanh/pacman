@@ -1,43 +1,57 @@
 import pygame
+
+BLACK = (0,0,0)
+WHITE = (255, 255, 255)
+RED = (255,0,0)
+
 pygame.init()
+WINDOW_WIDTH = 500
+WINDOW_HEIGHT = 500
+gameDisplay = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+pygame.display.set_caption('pacman')
 
-window_width = 500
-window_height = 400
+obj_width = 10
+obj_height = 10
+obj_x = 245
+obj_y = 245
+change_x = 0
+change_y = 0
 
-black = (0,0,0)
-white = (255,255,255)
-red = (255,0,0)
+keepGoing = True
 
-window = pygame.display.set_mode((window_width, window_height))
-pygame.display.set_caption('Pacman')
 clock = pygame.time.Clock()
 
-crashed = False
-
-circleX = 0
-circleY= 200
-circleVelX = 0
-circleVelY = 0
-
-while not crashed:
-    window.fill((0,0,0))
-    pygame.draw.rect(window, (255,80,80), (circleX,circleY,30,30))
-    #pygame.draw.circle(window, (255,80,80), (circleX, circleY), 20, 0)
-    #pygame.draw.lines(window, white, True, ((400,400), (300,300), (400,300)))
-    #pygame.draw.circle(WHERE TO DRAW, (RED, GREEN, BLUE), (X COORDINATE, Y COORDINATE), RADIUS, HEIGHT, WIDTH)
-    #pygame.draw.lines(WHERE TO DRAW, COLOUR, CLOSE THE SHAPE FOR US?, THE POINTS TO DRAW, LINE WIDTH)
-    circleX += circleVelX
-    #circleY += circleVelY
-    circleVelX += 0.1
-    #circleVelY += 0.1
-
-    
-    for event in pygame.event.get():    #get any events that happen -> get list of events per frame per second
+while keepGoing:
+    for event in pygame.event.get():    #event handler
         if event.type == pygame.QUIT:
-            crashed = True
-        #print(event)
-    pygame.display.update() #.update can update particular thing, not whole surface
-    clock.tick(60)
+            keepGoing = False
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_LEFT:
+                change_y = 0
+                change_x = -10
+            elif event.key == pygame.K_RIGHT:
+                change_y = 0
+                change_x = 10
+            elif event.key == pygame.K_UP:
+                change_x = 0
+                change_y = -10
+            elif event.key == pygame.K_DOWN:
+                change_x = 0
+                change_y = 10
+        if event.type == pygame.KEYUP:
+            if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
+                change_x = 0
+            if event.key == pygame.K_UP or event.key == pygame.K_DOWN:
+                change_y = 0
+    if obj_x+change_x > 0 and obj_x+change_x+obj_width<WINDOW_WIDTH:
+        obj_x += change_x
+    if obj_y+change_y > 0 and obj_y+change_y+obj_height<WINDOW_HEIGHT:
+        obj_y += change_y
+
+    gameDisplay.fill(BLACK)
+    pygame.draw.rect(gameDisplay, RED, (obj_x, obj_y, obj_width, obj_height)) #top left coords, width, height
+    pygame.display.update()
+    clock.tick(30)
 
 pygame.quit()
-quit()
+quit() 
