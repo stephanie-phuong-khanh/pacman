@@ -5,9 +5,15 @@ WHITE = (255, 255, 255)
 RED = (255,0,0)
 BLUE = (0,0,255)
 
-pygame.init()
+pygame.font.init()
+myfont = pygame.font.SysFont('Comic Sans MS', 50)
+
+
 WINDOW_WIDTH = 500
-WINDOW_HEIGHT = 500
+WINDOW_HEIGHT = 600
+GAME_WIDTH = 500
+GAME_HEIGHT = 500
+top_offset = (WINDOW_HEIGHT - GAME_HEIGHT) / 2
 gameDisplay = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 pygame.display.set_caption('pacman')
 
@@ -21,8 +27,8 @@ with open('mazes/maze_01.txt', 'r') as maze:
 
 maze_height = len(maze_arr)
 maze_width = len(maze_arr[0])
-pixel_height = WINDOW_HEIGHT / maze_height
-pixel_width = WINDOW_WIDTH / maze_width
+pixel_height = GAME_HEIGHT / maze_height
+pixel_width = GAME_WIDTH / maze_width
 
 # Object
 obj_width = 10
@@ -100,22 +106,25 @@ while keepGoing:
     obj_y += change_y
 
     #Draw maze
+    gameDisplay.fill(BLACK)
     lead_x = 0
     lead_y = 0
     for row in maze_arr:
         for col in row:
             if col == '#':
-                pygame.draw.rect(gameDisplay, BLUE, (lead_x, lead_y, pixel_width, pixel_height))
+                pygame.draw.rect(gameDisplay, BLUE, (lead_x, top_offset+lead_y, pixel_width, pixel_height))
             elif col == '@':
-                pygame.draw.rect(gameDisplay, BLACK, (lead_x, lead_y, pixel_width, pixel_height))
-                pygame.draw.circle(gameDisplay, WHITE, (int(lead_x + pixel_width/2), int(lead_y + pixel_height/2)), 3, 0)
+                pygame.draw.rect(gameDisplay, BLACK, (lead_x, top_offset+lead_y, pixel_width, pixel_height))
+                pygame.draw.circle(gameDisplay, WHITE, (int(lead_x + pixel_width/2), int(top_offset + lead_y + pixel_height/2)), 3, 0)
             else:
-                pygame.draw.rect(gameDisplay, BLACK, (lead_x, lead_y, pixel_width, pixel_height))
+                pygame.draw.rect(gameDisplay, BLACK, (lead_x, top_offset+lead_y, pixel_width, pixel_height))
             lead_x += pixel_width
         lead_y += pixel_height
         lead_x = 0
 
-    pygame.draw.rect(gameDisplay, RED, (obj_x*pixel_width+5, obj_y*pixel_height+5, 10, 10)) #top left coords, width, height
+    pygame.draw.rect(gameDisplay, RED, (obj_x*pixel_width+5, top_offset+obj_y*pixel_height+5, 10, 10)) #top left coords, width, height
+    score_text = myfont.render('score: '+ str(score), True, WHITE)
+    gameDisplay.blit(score_text,(WINDOW_WIDTH/50, top_offset/5))
     pygame.display.update()
     clock.tick(5)
 
