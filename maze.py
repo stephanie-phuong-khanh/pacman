@@ -9,7 +9,7 @@ WINDOW_WIDTH = 500
 WINDOW_HEIGHT = 500
 
 maze_arr = []
-with open('maze.txt', 'r') as maze:
+with open('mazes/maze_01.txt', 'r') as maze:
     m = maze.readlines()
     for i in m:
         line = i.rstrip()
@@ -19,7 +19,6 @@ maze_height = len(maze_arr)
 maze_width = len(maze_arr[0])
 pixel_height = WINDOW_HEIGHT / maze_height
 pixel_width = WINDOW_WIDTH / maze_width
-print (pixel_height, pixel_width)
 
 pygame.init()
 gameDisplay = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
