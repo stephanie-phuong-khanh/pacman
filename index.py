@@ -17,7 +17,7 @@ with open('mazes/maze_01.txt', 'r') as maze:
     m = maze.readlines()
     for i in m:
         line = i.rstrip()
-        maze_arr.append(line)
+        maze_arr.append(list(line))
 
 maze_height = len(maze_arr)
 maze_width = len(maze_arr[0])
@@ -29,6 +29,7 @@ obj_width = 10
 obj_height = 10
 obj_x = 1
 obj_y = 1
+score = 0
 
 # Movement
 MOVE_UP = 1
@@ -91,15 +92,23 @@ while keepGoing:
     if maze_arr[obj_y+change_y][obj_x+change_x] == '#':
         change_x = 0
         change_y = 0
+    elif maze_arr[obj_y+change_y][obj_x+change_x] == '@':
+        maze_arr[obj_y+change_y][obj_x+change_x] = ' '
+        score += 1
+        print(score)
     obj_x += change_x
     obj_y += change_y
 
+    #Draw maze
     lead_x = 0
     lead_y = 0
     for row in maze_arr:
         for col in row:
             if col == '#':
                 pygame.draw.rect(gameDisplay, BLUE, (lead_x, lead_y, pixel_width, pixel_height))
+            elif col == '@':
+                pygame.draw.rect(gameDisplay, BLACK, (lead_x, lead_y, pixel_width, pixel_height))
+                pygame.draw.circle(gameDisplay, WHITE, (int(lead_x + pixel_width/2), int(lead_y + pixel_height/2)), 3, 0)
             else:
                 pygame.draw.rect(gameDisplay, BLACK, (lead_x, lead_y, pixel_width, pixel_height))
             lead_x += pixel_width
