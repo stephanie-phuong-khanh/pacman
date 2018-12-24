@@ -7,8 +7,6 @@ BLUE = (0,0,255)
 
 pygame.font.init()
 myfont = pygame.font.SysFont('Comic Sans MS', 50)
-
-
 WINDOW_WIDTH = 500
 WINDOW_HEIGHT = 600
 GAME_WIDTH = 500
@@ -31,8 +29,14 @@ pixel_height = GAME_HEIGHT / maze_height
 pixel_width = GAME_WIDTH / maze_width
 
 # Object
-obj_width = 10
-obj_height = 10
+obj_width = 16
+obj_height = 16
+pacman_orig = pygame.image.load('pacman.png')
+pacman_orig = pygame.transform.scale(pacman_orig, (obj_width, obj_height))
+pacman_right = pygame.transform.rotate(pacman_orig, 0)
+pacman_left = pygame.transform.rotate(pacman_orig, 180)
+pacman_up = pygame.transform.rotate(pacman_orig, 90)
+pacman_down = pygame.transform.rotate(pacman_orig, 270)
 obj_x = 1
 obj_y = 1
 score = 0
@@ -48,6 +52,7 @@ change_y = 0
 
 keepGoing = True
 clock = pygame.time.Clock()
+pacman = pacman_orig
 
 while keepGoing:
     for event in pygame.event.get():    #event handler
@@ -102,8 +107,19 @@ while keepGoing:
         maze_arr[obj_y+change_y][obj_x+change_x] = ' '
         score += 1
         print(score)
+
+    if change_x == 1: #right
+        pacman = pacman_right
+    elif change_x == -1: #left
+        pacman = pacman_left
+    elif change_y == -1: #up
+        pacman = pacman_up
+    elif change_y == 1: #down
+        pacman = pacman_down
+
     obj_x += change_x
     obj_y += change_y
+    
 
     #Draw maze
     gameDisplay.fill(BLACK)
@@ -122,9 +138,10 @@ while keepGoing:
         lead_y += pixel_height
         lead_x = 0
 
-    pygame.draw.rect(gameDisplay, RED, (obj_x*pixel_width+5, top_offset+obj_y*pixel_height+5, 10, 10)) #top left coords, width, height
+    gameDisplay.blit(pacman, (obj_x*pixel_width+2,top_offset+obj_y*pixel_height+2))
+    #pygame.draw.rect(gameDisplay, RED, (obj_x*pixel_width+5, top_offset+obj_y*pixel_height+5, 10, 10)) #top left coords, width, height
     score_text = myfont.render('score: '+ str(score), True, WHITE)
-    gameDisplay.blit(score_text,(WINDOW_WIDTH/50, top_offset/5))
+    gameDisplay.blit(score_text,(WINDOW_WIDTH/30, top_offset/5))
     pygame.display.update()
     clock.tick(5)
 
