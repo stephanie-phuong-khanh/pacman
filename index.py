@@ -3,7 +3,7 @@ import pygame
 BLACK = (0,0,0)
 WHITE = (255, 255, 255)
 RED = (255,0,0)
-BLUE = (0,0,255)
+BLUE = (5,21,104)
 
 pygame.font.init()
 myfont = pygame.font.SysFont('Comic Sans MS', 50)
@@ -20,8 +20,11 @@ maze_arr = []
 with open('mazes/maze_01.txt', 'r') as maze:
     m = maze.readlines()
     for i in m:
-        line = i.rstrip()
-        maze_arr.append(list(line))
+        line = list(i.rstrip())
+        maze_arr.append(line)
+
+target_score = sum(row.count('@') for row in maze_arr)
+print(target_score)
 
 maze_height = len(maze_arr)
 maze_width = len(maze_arr[0])
@@ -29,8 +32,8 @@ pixel_height = GAME_HEIGHT / maze_height
 pixel_width = GAME_WIDTH / maze_width
 
 # Object
-obj_width = 16
-obj_height = 16
+obj_width = 18
+obj_height = 18
 pacman_orig = pygame.image.load('pacman.png')
 pacman_orig = pygame.transform.scale(pacman_orig, (obj_width, obj_height))
 pacman_right = pygame.transform.rotate(pacman_orig, 0)
@@ -106,7 +109,8 @@ while keepGoing:
     elif maze_arr[obj_y+change_y][obj_x+change_x] == '@':
         maze_arr[obj_y+change_y][obj_x+change_x] = ' '
         score += 1
-        print(score)
+        if score == target_score:
+            keepGoing = False
 
     if change_x == 1: #right
         pacman = pacman_right
@@ -130,15 +134,12 @@ while keepGoing:
             if col == '#':
                 pygame.draw.rect(gameDisplay, BLUE, (lead_x, top_offset+lead_y, pixel_width, pixel_height))
             elif col == '@':
-                pygame.draw.rect(gameDisplay, BLACK, (lead_x, top_offset+lead_y, pixel_width, pixel_height))
                 pygame.draw.circle(gameDisplay, WHITE, (int(lead_x + pixel_width/2), int(top_offset + lead_y + pixel_height/2)), 3, 0)
-            else:
-                pygame.draw.rect(gameDisplay, BLACK, (lead_x, top_offset+lead_y, pixel_width, pixel_height))
             lead_x += pixel_width
         lead_y += pixel_height
         lead_x = 0
 
-    gameDisplay.blit(pacman, (obj_x*pixel_width+2,top_offset+obj_y*pixel_height+2))
+    gameDisplay.blit(pacman, (obj_x*pixel_width+1,top_offset+obj_y*pixel_height+1))
     #pygame.draw.rect(gameDisplay, RED, (obj_x*pixel_width+5, top_offset+obj_y*pixel_height+5, 10, 10)) #top left coords, width, height
     score_text = myfont.render('score: '+ str(score), True, WHITE)
     gameDisplay.blit(score_text,(WINDOW_WIDTH/30, top_offset/5))
