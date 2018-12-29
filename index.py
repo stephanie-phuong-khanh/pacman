@@ -34,7 +34,7 @@ pixel_width = GAME_WIDTH / maze_width
 # Object
 obj_width = 18
 obj_height = 18
-pacman_orig = pygame.image.load('pacman.png')
+pacman_orig = pygame.image.load('img/pacman.png')
 pacman_orig = pygame.transform.scale(pacman_orig, (obj_width, obj_height))
 pacman_right = pygame.transform.rotate(pacman_orig, 0)
 pacman_left = pygame.transform.rotate(pacman_orig, 180)
