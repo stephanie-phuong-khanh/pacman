@@ -75,16 +75,25 @@ class Graph():
         self.adj_list[src].add(forward_node)
         backward_node = Move(src, cost)
         self.adj_list[dest].add(backward_node)
+    def remove_edge(self, node):
+        for move in self.adj_list[node]:
+            for edge in self.adj_list[move.dest]:
+                if edge.dest == node:
+                    self.adj_list[move.dest].remove(edge)
+                    break
+        del self.adj_list[node]
     def print_graph(self):
         for key, value in self.adj_list.items():
             print(key)
             for i in value:
                 print(i)
             print('\n')
-    def dijkstra(self, start):
+    def dijkstra(self, start, dest):
         visited = {}
+        best_paths = {}
         heap = MinHeap()
         for node in self.adj_list.keys():
+            best_paths[node] = []
             if start == node:
                 heap.add_node(node, 0)
             else:
@@ -101,10 +110,11 @@ class Graph():
                 new_cost = curr_cost + move.cost
                 if new_cost < heap_node[1]:
                     heap.change_cost(move.dest, new_cost)
+                    best_paths[move.dest] = best_paths[curr_node].copy()
+                    best_paths[move.dest].append(move)
             visited[curr_node] = curr_cost
             heap.build_heap()
-        for i in visited.items():
-            print(i)
+        return best_paths[dest]
 
 
 # Graph creation from Maze
@@ -131,7 +141,6 @@ def maze_to_graph(maze_arr):
 
     #For each node, detect edges and add to graph
     for node in node_list:
-        #print(node)
         dist = 1 #UP
         while(True):
             if maze_arr[node.y-dist][node.x] == '#':
@@ -170,13 +179,24 @@ def maze_to_graph(maze_arr):
             dist += 1
     return graph
 
-maze_arr = []
-with open('mazes/maze_01.txt', 'r') as maze:
-    m = maze.readlines()
-    for i in m:
-        line = list(i.rstrip())
-        maze_arr.append(line)
-graph = maze_to_graph(maze_arr)
-#graph.print_graph()
-start = Coord(1,1)
-graph.dijkstra(start)
+if __name__ == '__main__':
+    maze_arr = []
+    with open('mazes/maze_01.txt', 'r') as maze:
+        m = maze.readlines()
+        for i in m:
+            line = list(i.rstrip())
+            maze_arr.append(line)
+    graph = maze_to_graph(maze_arr)
+    # graph.print_graph()
+
+    #TESTING REMOVAL
+    # to_remove = Coord(23,23)
+    # graph.remove_edge(to_remove)
+    # graph.print_graph()
+
+    #TESTING DIJKSTRA
+    start = Coord(1,1)
+    end = Coord(23,23)
+    path = graph.dijkstra(start, end)
+    for move in path:
+        print(move.dest)
