@@ -65,26 +65,24 @@ class MinHeap():
     def print_heap(self):
         for i in self.arr:
             print (i)
-        #print (self.arr)
-
-# test = MinHeap()
-# test_coord = Coord(1,1)
-# test.add_node(test_coord, 10)
-# test.change_cost(test_coord, 5)
-# test.print_heap()
 
 # Graph represented by adjacency list
 class Graph():
     def __init__(self):
-        self.adj_list = defaultdict(list)  #dictionary w/ key=node, value=list of namedtuples (destination, cost)
+        self.adj_list = defaultdict(set)  #dictionary w/ key=node, value=set of namedtuples (destination, cost)
     def add_edge(self, src, dest, cost):
         forward_node = Move(dest, cost)
-        self.adj_list[src].insert(0, forward_node)
+        self.adj_list[src].add(forward_node)
         backward_node = Move(src, cost)
-        self.adj_list[dest].insert(0, backward_node)
+        self.adj_list[dest].add(backward_node)
     def print_graph(self):
-        print (self.adj_list)
+        for key, value in self.adj_list.items():
+            print(key)
+            for i in value:
+                print(i)
+            print('\n')
     def dijkstra(self, start):
+        visited = {}
         heap = MinHeap()
         for node in self.adj_list.keys():
             if start == node:
@@ -98,23 +96,24 @@ class Graph():
             curr_cost = curr[1]
             for move in self.adj_list[curr_node]:
                 heap_node = heap.is_present(move.dest)
-                if heap_node != False:
-                    new_cost = curr_cost + move.cost
-                    # if heap_node[1] == 10000:
-                    #     heap.change_cost(move.dest, curr_cost + move)
-                    if new_cost < heap_node[1]:
-                        heap.change_cost(move.dest, new_cost)
-            #print(curr_node, curr_cost)
+                if heap_node == False:
+                    continue
+                new_cost = curr_cost + move.cost
+                if new_cost < heap_node[1]:
+                    heap.change_cost(move.dest, new_cost)
+            visited[curr_node] = curr_cost
             heap.build_heap()
+        for i in visited.items():
+            print(i)
 
 
 # Graph creation from Maze
 def is_edge(maze_arr, down, right):
     if maze_arr[down][right] == '#':
         return False
-    if maze_arr[down][right-1] and maze_arr[down][right+1] == '#':
+    if maze_arr[down][right-1] == '#' and maze_arr[down][right+1] == '#':
         return False
-    if maze_arr[down-1][right] and maze_arr[down+1][right] == '#':
+    if maze_arr[down-1][right] == '#' and maze_arr[down+1][right] == '#':
         return False
     return True
 
@@ -130,13 +129,6 @@ def maze_to_graph(maze_arr):
                 node_list.append(new_node)
     graph = Graph()
 
-    # minheap = MinHeap()
-    # for node in node_list:
-    #     num = random.randint(1,20)
-    #     minheap.add_node(node, num)
-    # minheap.build_heap()
-    #minheap.print_heap()
-
     #For each node, detect edges and add to graph
     for node in node_list:
         #print(node)
@@ -147,6 +139,7 @@ def maze_to_graph(maze_arr):
             if is_edge(maze_arr, node.y-dist, node.x):
                 dest = Coord(node.x, node.y-dist)
                 graph.add_edge(node, dest, dist) #src, dest, cost
+                break
             dist += 1
         dist = 1    #DOWN
         while(True):
@@ -155,6 +148,7 @@ def maze_to_graph(maze_arr):
             if is_edge(maze_arr, node.y+dist, node.x):
                 dest = Coord(node.x, node.y+dist)
                 graph.add_edge(node, dest, dist) #src, dest, cost
+                break
             dist += 1
         dist = 1    #LEFT
         while(True):
@@ -163,6 +157,7 @@ def maze_to_graph(maze_arr):
             if is_edge(maze_arr, node.y, node.x-dist):
                 dest = Coord(node.x-dist, node.y)
                 graph.add_edge(node, dest, dist) #src, dest, cost
+                break
             dist += 1
         dist = 1    #RIGHT
         while(True):
@@ -171,6 +166,7 @@ def maze_to_graph(maze_arr):
             if is_edge(maze_arr, node.y, node.x+dist):
                 dest = Coord(node.x+dist, node.y)
                 graph.add_edge(node, dest, dist) #src, dest, cost
+                break
             dist += 1
     return graph
 
