@@ -1,5 +1,4 @@
 from collections import namedtuple, defaultdict
-import random
 
 Coord = namedtuple('Coord', 'x, y')
 Move = namedtuple('Move', 'dest, cost')
@@ -70,6 +69,11 @@ class MinHeap():
 class Graph():
     def __init__(self):
         self.adj_list = defaultdict(set)  #dictionary w/ key=node, value=set of namedtuples (destination, cost)
+    def return_node_list(self):
+        ret = []
+        for key in self.adj_list.keys():
+            ret.append(key)
+        return ret
     def add_edge(self, src, dest, cost):
         forward_node = Move(dest, cost)
         self.adj_list[src].add(forward_node)
@@ -83,11 +87,12 @@ class Graph():
                     break
         del self.adj_list[node]
     def print_graph(self):
-        for key, value in self.adj_list.items():
-            print(key)
-            for i in value:
-                print(i)
-            print('\n')
+        print('graph length:', len(self.adj_list))
+        # for key, value in self.adj_list.items():
+        #     print(key)
+        #     for i in value:
+        #         print(i)
+        #     print('\n')
     def dijkstra(self, start, dest):
         visited = {}
         best_paths = {}
@@ -111,7 +116,7 @@ class Graph():
                 if new_cost < heap_node[1]:
                     heap.change_cost(move.dest, new_cost)
                     best_paths[move.dest] = best_paths[curr_node].copy()
-                    best_paths[move.dest].append(move)
+                    best_paths[move.dest].append(move.dest)
             visited[curr_node] = curr_cost
             heap.build_heap()
         return best_paths[dest]
@@ -119,11 +124,7 @@ class Graph():
 
 # Graph creation from Maze
 def is_edge(maze_arr, down, right):
-    if maze_arr[down][right] == '#':
-        return False
-    if maze_arr[down][right-1] == '#' and maze_arr[down][right+1] == '#':
-        return False
-    if maze_arr[down-1][right] == '#' and maze_arr[down+1][right] == '#':
+    if maze_arr[down][right] == '#' or maze_arr[down][right-1] == '#' and maze_arr[down][right+1] == '#' or maze_arr[down-1][right] == '#' and maze_arr[down+1][right] == '#':
         return False
     return True
 
@@ -196,7 +197,7 @@ if __name__ == '__main__':
 
     #TESTING DIJKSTRA
     start = Coord(1,1)
-    end = Coord(23,23)
+    end = Coord(1,5)
     path = graph.dijkstra(start, end)
     for move in path:
-        print(move.dest)
+        print(move)
