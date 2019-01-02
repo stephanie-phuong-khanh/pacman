@@ -1,4 +1,5 @@
 from collections import namedtuple, defaultdict
+import random
 
 Coord = namedtuple('Coord', 'x, y')
 Move = namedtuple('Move', 'dest, cost')
@@ -14,40 +15,39 @@ class MinHeap():
         temp = self.arr[first]
         self.arr[first] = self.arr[second]
         self.arr[second] = temp
-    def heapify(self, original, size):
-        index = original
-        while (index < size):
-            left_child = 2*index
-            right_child = left_child + 1
-            if left_child < size and self.arr[left_child][1] < self.arr[index][1]:
-                index = left_child
-            if right_child < size and self.arr[right_child][1] < self.arr[index][1]:
-                index = right_child
-            if index == original:
-                return
-            self.swap(original, index)
-            original = index
-    def build_heap(self):
+    def heapify(self, i):
         size = len(self.arr)
-        i = int(size / 2 - 1)
-        while (i >= 0):
-            self.heapify(i, size)
+        smallest_index = i
+        left_child = 2*i+1
+        right_child = 2*i+2
+        if left_child < size and self.arr[left_child][1] < self.arr[smallest_index][1]:
+            smallest_index = left_child
+        if right_child < size and self.arr[right_child][1] < self.arr[smallest_index][1]:
+            smallest_index = right_child
+        if smallest_index != i:
+            self.swap(smallest_index, i)
+            self.heapify(smallest_index)
+    def build_heap(self):
+        start = len(self.arr)//2-1
+        i = start
+        while(i >= 0):
+            self.heapify(i)
             i -= 1
     def extract_min(self):
         if self.is_empty():
             return
         min_node = self.arr[0]
         self.arr.pop(0)
-        self.heapify(0,len(self.arr))
+        self.heapify(0)
         return min_node
-    def heap_sort(self):
-        self.build_heap()
-        last = len(self.arr) - 1
-        while (last > 0):
-            print(self.arr[0])
-            self.swap(0, last)
-            self.heapify(0, last)
-            last -= 1
+    # def heap_sort(self):
+    #     self.build_heap()
+    #     last = len(self.arr) - 1
+    #     while (last > 0):
+    #         print(self.arr[0])
+    #         self.swap(0, last)
+    #         self.heapify(0, last)
+    #         last -= 1
     def is_present(self, node):
         for i in self.arr:
             if i[0] == node:
@@ -87,13 +87,14 @@ class Graph():
                     break
         del self.adj_list[node]
     def print_graph(self):
-        print('graph length:', len(self.adj_list))
-        # for key, value in self.adj_list.items():
-        #     print(key)
-        #     for i in value:
-        #         print(i)
-        #     print('\n')
+        # print('graph length:', len(self.adj_list))
+        for key, value in self.adj_list.items():
+            print(key)
+            for i in value:
+                print(i)
     def dijkstra(self, start, dest):
+        if start.x == dest.x or start.y == dest.y:
+            return [dest]
         visited = {}
         best_paths = {}
         heap = MinHeap()
@@ -196,8 +197,55 @@ if __name__ == '__main__':
     # graph.print_graph()
 
     #TESTING DIJKSTRA
-    start = Coord(1,1)
-    end = Coord(1,5)
+    node_list = graph.return_node_list()
+    #print('node list:', node_list)
+    start = Coord(5,6)
+    end = Coord(1,1)
+    if start not in node_list:
+        print('NOT IN -> SHOULD ADD')
+        dist = 1 #UP
+        while(True):
+            if maze_arr[start.y-dist][start.x] == '#':
+                break
+            if is_edge(maze_arr, start.y-dist, start.x):
+                dest = Coord(start.x, start.y-dist)
+                graph.add_edge(start, dest, dist) #src, dest, cost
+                break
+            dist += 1
+        dist = 1    #DOWN
+        while(True):
+            if maze_arr[start.y+dist][start.x] == '#':
+                break
+            if is_edge(maze_arr, start.y+dist, start.x):
+                dest = Coord(start.x, start.y+dist)
+                graph.add_edge(start, dest, dist) #src, dest, cost
+                break
+            dist += 1
+        dist = 1    #LEFT
+        while(True):
+            if maze_arr[start.y][start.x-dist] == '#':
+                break
+            if is_edge(maze_arr, start.y, start.x-dist):
+                dest = Coord(start.x-dist, start.y)
+                graph.add_edge(start, dest, dist) #src, dest, cost
+                break
+            dist += 1
+        dist = 1    #RIGHT
+        while(True):
+            if maze_arr[start.y][start.x+dist] == '#':
+                break
+            if is_edge(maze_arr, start.y, start.x+dist):
+                dest = Coord(start.x+dist, start.y)
+                graph.add_edge(start, dest, dist) #src, dest, cost
+                break
+            dist += 1
+    node_list = graph.return_node_list()
+    #print('after list:', node_list)
+    if start in node_list:
+        print('IT IS IN IT')
+    else:
+        print('NOT IN')
     path = graph.dijkstra(start, end)
-    for move in path:
-        print(move)
+    print(path)
+    # for move in path:
+    #     print(move)

@@ -29,7 +29,7 @@ with open('mazes/maze_01.txt', 'r') as maze:
         maze_arr.append(line)
 
 target_score = sum(row.count('@') for row in maze_arr)
-print(target_score)
+# print(target_score)
 
 maze_height = len(maze_arr)
 maze_width = len(maze_arr[0])
@@ -68,10 +68,7 @@ ghost_y = 23
 ghost_change_x = 0
 ghost_change_y = 0
 
-orig_graph = maze_to_graph(maze_arr)
-orig_path = orig_graph.return_node_list()
-# print('ORIG_PATH:', orig_path)
-# print('ORIG_PATH SIZE:', len(orig_path))
+node_list = maze_to_graph(maze_arr).return_node_list()
 
 ghost_recalculate_counter = 0
 graph = maze_to_graph(maze_arr)
@@ -84,10 +81,10 @@ def ghost_recalculate():
     global end
     global path
     global graph
-    global orig_path
+    global node_list
     start = Coord(ghost_x,ghost_y)
     end = Coord(obj_x,obj_y)
-    if start not in orig_path:
+    if start not in node_list:
         dist = 1 #UP
         while(True):
             if maze_arr[start.y-dist][start.x] == '#':
@@ -125,7 +122,7 @@ def ghost_recalculate():
                 break
             dist += 1
 
-    if end not in orig_path:
+    if end not in node_list:
         dist = 1 #UP
         while(True):
             if maze_arr[end.y-dist][end.x] == '#':
@@ -164,9 +161,9 @@ def ghost_recalculate():
             dist += 1
         
     path = graph.dijkstra(start, end)
-    if start not in orig_path:
+    if start not in node_list:
         graph.remove_edge(start)
-    if end not in orig_path:
+    if end not in node_list:
         graph.remove_edge(end)
 
 keepGoing = True
@@ -215,7 +212,7 @@ while keepGoing:
         stop_text = final_font.render('GAME OVER...', True, WHITE)
         gameDisplay.blit(stop_text,(0,0))
         pygame.display.update()
-        pygame.time.delay(2000)
+        pygame.time.delay(1000)
         keepGoing = False
         continue
 
@@ -279,8 +276,11 @@ while keepGoing:
         ghost_recalculate_counter = 0
         ghost_recalculate()
         target_index = 0
-    print('path_length:', len(path))
-    print('target_index:', target_index, '\n')
+    # print('path_length:', len(path))
+    # print('start:', start)
+    # print('end:', end)
+    # print('path:', path)
+    # print('target_index:', target_index, '\n')
 
     
     #Draw maze
