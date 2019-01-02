@@ -1,5 +1,5 @@
-# Pacman, the arcade classic
-<br><br>
+# Pacman
+<br>
 <img src="img/preview.png" width="350">
 
 ## Build with Python 3
