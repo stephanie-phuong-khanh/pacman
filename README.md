@@ -1,5 +1,4 @@
-# Pacman
-The classic arcade game, remade with Pygame.
+# Pacman, the arcade classic
 <br><br>
 <img src="img/preview.png" width="350">
 
