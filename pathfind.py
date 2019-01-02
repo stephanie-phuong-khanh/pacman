@@ -40,14 +40,6 @@ class MinHeap():
         self.arr.pop(0)
         self.heapify(0)
         return min_node
-    # def heap_sort(self):
-    #     self.build_heap()
-    #     last = len(self.arr) - 1
-    #     while (last > 0):
-    #         print(self.arr[0])
-    #         self.swap(0, last)
-    #         self.heapify(0, last)
-    #         last -= 1
     def is_present(self, node):
         for i in self.arr:
             if i[0] == node:
@@ -93,8 +85,8 @@ class Graph():
             for i in value:
                 print(i)
     def dijkstra(self, start, dest):
-        if start.x == dest.x or start.y == dest.y:
-            return [dest]
+        # if start.x == dest.x or start.y == dest.y:
+        #     return [dest]
         visited = {}
         best_paths = {}
         heap = MinHeap()
@@ -189,12 +181,6 @@ if __name__ == '__main__':
             line = list(i.rstrip())
             maze_arr.append(line)
     graph = maze_to_graph(maze_arr)
-    # graph.print_graph()
-
-    #TESTING REMOVAL
-    # to_remove = Coord(23,23)
-    # graph.remove_edge(to_remove)
-    # graph.print_graph()
 
     #TESTING DIJKSTRA
     node_list = graph.return_node_list()
@@ -247,5 +233,3 @@ if __name__ == '__main__':
         print('NOT IN')
     path = graph.dijkstra(start, end)
     print(path)
-    # for move in path:
-    #     print(move)

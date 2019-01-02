@@ -1,6 +1,6 @@
 import pygame
 from collections import namedtuple, defaultdict
-from progress.pathfind import MinHeap, Graph, is_edge, maze_to_graph
+from pathfind import MinHeap, Graph, is_edge, maze_to_graph
 
 BLACK = (0,0,0)
 WHITE = (255, 255, 255)
@@ -21,20 +21,20 @@ Coord = namedtuple('Coord', 'x, y')
 Move = namedtuple('Move', 'dest, cost')
 
 # Maze
-maze_arr = []
+MAZE_ARR = []
 with open('mazes/maze_01.txt', 'r') as maze:
     m = maze.readlines()
     for i in m:
         line = list(i.rstrip())
-        maze_arr.append(line)
+        MAZE_ARR.append(line)
 
-target_score = sum(row.count('@') for row in maze_arr)
-# print(target_score)
-
-maze_height = len(maze_arr)
-maze_width = len(maze_arr[0])
+maze_height = len(MAZE_ARR)
+maze_width = len(MAZE_ARR[0])
 pixel_height = GAME_HEIGHT / maze_height
 pixel_width = GAME_WIDTH / maze_width
+
+target_score = sum(row.count('@') for row in MAZE_ARR)
+MAZE_NODE_LIST = maze_to_graph(MAZE_ARR).return_node_list()
 
 # Pacman
 obj_width = 18
@@ -58,114 +58,147 @@ next_move = 0
 change_x = 0
 change_y = 0
 
-# Ghost
-ghost_width = 16
-ghost_height = 16
-ghost = pygame.image.load('img/red.png')
-ghost = pygame.transform.scale(ghost, (ghost_width, ghost_height))
-ghost_x = 23
-ghost_y = 23
-ghost_change_x = 0
-ghost_change_y = 0
-
-node_list = maze_to_graph(maze_arr).return_node_list()
+#Ghosts
+class Ghost():
+    def __init__(self, start_x, start_y):
+        global obj_x
+        global obj_y
+        self.x = start_x
+        self.y = start_y
+        self.graph = maze_to_graph(MAZE_ARR)
+        start = Coord(self.x, self.y)
+        end = Coord(obj_x, obj_y)
+        self.path = self.graph.dijkstra(start, end)
+        self.target_index = 0
+    def move(self):
+        target_x = self.path[self.target_index].x
+        target_y = self.path[self.target_index].y
+        # [ghost_change_x, ghost_change_y]
+        if target_x > self.x:
+            self.x += 1
+        elif target_x < self.x:
+            self.x -= 1
+        elif target_y > self.y:
+            self.y += 1
+        elif target_y < self.y:
+            self.y -= 1
+        if target_x == self.x and target_y == self.y:
+            self.target_index += 1
+        if self.target_index == len(self.path):
+            self.recalculate()
+        return [self.x, self.y]
+    def recalculate(self):
+        global obj_x
+        global obj_y
+        self.target_index = 0
+        start = Coord(self.x, self.y)
+        end = Coord(obj_x, obj_y)
+        if start not in MAZE_NODE_LIST:
+            dist = 1 #UP
+            while(True):
+                if MAZE_ARR[start.y-dist][start.x] == '#':
+                    break
+                if is_edge(MAZE_ARR, start.y-dist, start.x):
+                    dest = Coord(start.x, start.y-dist)
+                    self.graph.add_edge(start, dest, dist) #src, dest, cost
+                    break
+                dist += 1
+            dist = 1    #DOWN
+            while(True):
+                if MAZE_ARR[start.y+dist][start.x] == '#':
+                    break
+                if is_edge(MAZE_ARR, start.y+dist, start.x):
+                    dest = Coord(start.x, start.y+dist)
+                    self.graph.add_edge(start, dest, dist) #src, dest, cost
+                    break
+                dist += 1
+            dist = 1    #LEFT
+            while(True):
+                if MAZE_ARR[start.y][start.x-dist] == '#':
+                    break
+                if is_edge(MAZE_ARR, start.y, start.x-dist):
+                    dest = Coord(start.x-dist, start.y)
+                    self.graph.add_edge(start, dest, dist) #src, dest, cost
+                    break
+                dist += 1
+            dist = 1    #RIGHT
+            while(True):
+                if MAZE_ARR[start.y][start.x+dist] == '#':
+                    break
+                if is_edge(MAZE_ARR, start.y, start.x+dist):
+                    dest = Coord(start.x+dist, start.y)
+                    self.graph.add_edge(start, dest, dist) #src, dest, cost
+                    break
+                dist += 1
+        if end not in MAZE_NODE_LIST:
+            dist = 1 #UP
+            while(True):
+                if MAZE_ARR[end.y-dist][end.x] == '#':
+                    break
+                if is_edge(MAZE_ARR, end.y-dist, end.x):
+                    dest = Coord(end.x, end.y-dist)
+                    self.graph.add_edge(end, dest, dist) #src, dest, cost
+                    break
+                dist += 1
+            dist = 1    #DOWN
+            while(True):
+                if MAZE_ARR[end.y+dist][end.x] == '#':
+                    break
+                if is_edge(MAZE_ARR, end.y+dist, end.x):
+                    dest = Coord(end.x, end.y+dist)
+                    self.graph.add_edge(end, dest, dist) #src, dest, cost
+                    break
+                dist += 1
+            dist = 1    #LEFT
+            while(True):
+                if MAZE_ARR[end.y][end.x-dist] == '#':
+                    break
+                if is_edge(MAZE_ARR, end.y, end.x-dist):
+                    dest = Coord(end.x-dist, end.y)
+                    self.graph.add_edge(end, dest, dist) #src, dest, cost
+                    break
+                dist += 1
+            dist = 1    #RIGHT
+            while(True):
+                if MAZE_ARR[end.y][end.x+dist] == '#':
+                    break
+                if is_edge(MAZE_ARR, end.y, end.x+dist):
+                    dest = Coord(end.x+dist, end.y)
+                    self.graph.add_edge(end, dest, dist) #src, dest, cost
+                    break
+                dist += 1
+        self.path = self.graph.dijkstra(start, end)
+        if start not in MAZE_NODE_LIST:
+            self.graph.remove_edge(start)
+        if end not in MAZE_NODE_LIST:
+            self.graph.remove_edge(end)
+    def catch(self):
+        global obj_x, obj_y
+        if self.x == obj_x and self.y == obj_y:
+            return True
+        return False
+    def return_path(self):
+        return self.path
 
 ghost_recalculate_counter = 0
-graph = maze_to_graph(maze_arr)
-start = Coord(ghost_x,ghost_y)
-end = Coord(obj_x,obj_y)
-path = graph.dijkstra(start, end)
-target_index = 0
-def ghost_recalculate():
-    global start
-    global end
-    global path
-    global graph
-    global node_list
-    start = Coord(ghost_x,ghost_y)
-    end = Coord(obj_x,obj_y)
-    if start not in node_list:
-        dist = 1 #UP
-        while(True):
-            if maze_arr[start.y-dist][start.x] == '#':
-                break
-            if is_edge(maze_arr, start.y-dist, start.x):
-                dest = Coord(start.x, start.y-dist)
-                graph.add_edge(start, dest, dist) #src, dest, cost
-                break
-            dist += 1
-        dist = 1    #DOWN
-        while(True):
-            if maze_arr[start.y+dist][start.x] == '#':
-                break
-            if is_edge(maze_arr, start.y+dist, start.x):
-                dest = Coord(start.x, start.y+dist)
-                graph.add_edge(start, dest, dist) #src, dest, cost
-                break
-            dist += 1
-        dist = 1    #LEFT
-        while(True):
-            if maze_arr[start.y][start.x-dist] == '#':
-                break
-            if is_edge(maze_arr, start.y, start.x-dist):
-                dest = Coord(start.x-dist, start.y)
-                graph.add_edge(start, dest, dist) #src, dest, cost
-                break
-            dist += 1
-        dist = 1    #RIGHT
-        while(True):
-            if maze_arr[start.y][start.x+dist] == '#':
-                break
-            if is_edge(maze_arr, start.y, start.x+dist):
-                dest = Coord(start.x+dist, start.y)
-                graph.add_edge(start, dest, dist) #src, dest, cost
-                break
-            dist += 1
 
-    if end not in node_list:
-        dist = 1 #UP
-        while(True):
-            if maze_arr[end.y-dist][end.x] == '#':
-                break
-            if is_edge(maze_arr, end.y-dist, end.x):
-                dest = Coord(end.x, end.y-dist)
-                graph.add_edge(end, dest, dist) #src, dest, cost
-                break
-            dist += 1
-        dist = 1    #DOWN
-        while(True):
-            if maze_arr[end.y+dist][end.x] == '#':
-                break
-            if is_edge(maze_arr, end.y+dist, end.x):
-                dest = Coord(end.x, end.y+dist)
-                graph.add_edge(end, dest, dist) #src, dest, cost
-                break
-            dist += 1
-        dist = 1    #LEFT
-        while(True):
-            if maze_arr[end.y][end.x-dist] == '#':
-                break
-            if is_edge(maze_arr, end.y, end.x-dist):
-                dest = Coord(end.x-dist, end.y)
-                graph.add_edge(end, dest, dist) #src, dest, cost
-                break
-            dist += 1
-        dist = 1    #RIGHT
-        while(True):
-            if maze_arr[end.y][end.x+dist] == '#':
-                break
-            if is_edge(maze_arr, end.y, end.x+dist):
-                dest = Coord(end.x+dist, end.y)
-                graph.add_edge(end, dest, dist) #src, dest, cost
-                break
-            dist += 1
-        
-    path = graph.dijkstra(start, end)
-    if start not in node_list:
-        graph.remove_edge(start)
-    if end not in node_list:
-        graph.remove_edge(end)
+red_ghost = Ghost(23, 23) 
+red_ghost_obj = pygame.image.load('img/red.png')
+red_ghost_obj = pygame.transform.scale(red_ghost_obj, (16, 16))  
 
+yellow_ghost = Ghost(23, 15) 
+yellow_ghost_obj = pygame.image.load('img/yellow.png')
+yellow_ghost_obj = pygame.transform.scale(yellow_ghost_obj, (16, 16))
+
+blue_ghost = Ghost(23, 1) 
+blue_ghost_obj = pygame.image.load('img/blue.png')
+blue_ghost_obj = pygame.transform.scale(blue_ghost_obj, (16, 16)) 
+
+pink_ghost = Ghost(1, 23) 
+pink_ghost_obj = pygame.image.load('img/pink.png')
+pink_ghost_obj = pygame.transform.scale(pink_ghost_obj, (16, 16)) 
+
+#Game loop
 keepGoing = True
 pause = False
 clock = pygame.time.Clock()
@@ -177,35 +210,35 @@ while keepGoing:
             keepGoing = False
         if event.type == pygame.KEYDOWN:      
             if event.key == pygame.K_UP:
-                if maze_arr[obj_y-1][obj_x] != '#':
+                if MAZE_ARR[obj_y-1][obj_x] != '#':
                     change_x = 0
                     change_y = -1
                     next_move = 0
                 else:
                     next_move = MOVE_UP
             elif event.key == pygame.K_DOWN:
-                if maze_arr[obj_y+1][obj_x] != '#':
+                if MAZE_ARR[obj_y+1][obj_x] != '#':
                     change_x = 0
                     change_y = 1
                     next_move = 0
                 else:
                     next_move = MOVE_DOWN
             elif event.key == pygame.K_LEFT:
-                if maze_arr[obj_y][obj_x-1] != '#':
+                if MAZE_ARR[obj_y][obj_x-1] != '#':
                     change_x = -1
                     change_y = 0
                     next_move = 0
                 else:
                     next_move = MOVE_LEFT
             elif event.key == pygame.K_RIGHT:
-                if maze_arr[obj_y][obj_x+1] != '#':
+                if MAZE_ARR[obj_y][obj_x+1] != '#':
                     change_x = 1
                     change_y = 0
                     next_move = 0
                 else:
                     next_move = MOVE_RIGHT
 
-    if ghost_x == obj_x and ghost_y == obj_y:
+    if red_ghost.catch() or blue_ghost.catch() or yellow_ghost.catch() or pink_ghost.catch():
         print('CAUGHT!')
         gameDisplay.fill(BLACK)
         final_font = pygame.font.SysFont('Comic Sans MS', 50)
@@ -217,23 +250,23 @@ while keepGoing:
         continue
 
     if next_move > 0:
-        if next_move == MOVE_UP and maze_arr[obj_y-1][obj_x] != '#':
+        if next_move == MOVE_UP and MAZE_ARR[obj_y-1][obj_x] != '#':
             change_x = 0
             change_y = -1
-        elif next_move == MOVE_DOWN and maze_arr[obj_y+1][obj_x] != '#':
+        elif next_move == MOVE_DOWN and MAZE_ARR[obj_y+1][obj_x] != '#':
             change_x = 0
             change_y = 1
-        elif next_move == MOVE_LEFT and maze_arr[obj_y][obj_x-1] != '#':
+        elif next_move == MOVE_LEFT and MAZE_ARR[obj_y][obj_x-1] != '#':
             change_x = -1
             change_y = 0
-        elif next_move == MOVE_RIGHT and maze_arr[obj_y][obj_x+1] != '#':
+        elif next_move == MOVE_RIGHT and MAZE_ARR[obj_y][obj_x+1] != '#':
             change_x = 1
             change_y = 0
-    if maze_arr[obj_y+change_y][obj_x+change_x] == '#':
+    if MAZE_ARR[obj_y+change_y][obj_x+change_x] == '#':
         change_x = 0
         change_y = 0
-    elif maze_arr[obj_y+change_y][obj_x+change_x] == '@':
-        maze_arr[obj_y+change_y][obj_x+change_x] = ' '
+    elif MAZE_ARR[obj_y+change_y][obj_x+change_x] == '@':
+        MAZE_ARR[obj_y+change_y][obj_x+change_x] = ' '
         score += 1
         if score == target_score:
             keepGoing = False
@@ -251,43 +284,27 @@ while keepGoing:
     obj_y += change_y
 
     #GHOST MOVEMENT
-    target_x = path[target_index].x
-    target_y = path[target_index].y
-    if target_x > ghost_x:
-        ghost_change_x = 1
-        ghost_change_y = 0
-    elif target_x < ghost_x:
-        ghost_change_x = -1
-        ghost_change_y = 0
-    elif target_y > ghost_y:
-        ghost_change_y = 1
-        ghost_change_x = 0
-    elif target_y < ghost_y:
-        ghost_change_y = -1
-        ghost_change_x = 0
-    
-    ghost_x += ghost_change_x
-    ghost_y += ghost_change_y
+    new_red_pos = red_ghost.move()
+    new_yellow_pos = yellow_ghost.move()
+    new_blue_pos = blue_ghost.move()
+    new_pink_pos = pink_ghost.move()
 
     ghost_recalculate_counter += 1
-    if target_x == ghost_x and target_y == ghost_y:
-        target_index += 1          
-    if target_index == len(path) or ghost_recalculate_counter == 5:
-        ghost_recalculate_counter = 0
-        ghost_recalculate()
-        target_index = 0
-    # print('path_length:', len(path))
-    # print('start:', start)
-    # print('end:', end)
-    # print('path:', path)
-    # print('target_index:', target_index, '\n')
-
+    mod = ghost_recalculate_counter % 4
+    if mod == 0:
+        red_ghost.recalculate()
+    elif mod == 1:
+        yellow_ghost.recalculate()
+    elif mod == 2:
+        blue_ghost.recalculate()
+    elif mod == 3:
+        pink_ghost.recalculate()
     
     #Draw maze
     gameDisplay.fill(BLACK)
     lead_x = 0
     lead_y = 0
-    for row in maze_arr:
+    for row in MAZE_ARR:
         for col in row:
             if col == '#':
                 pygame.draw.rect(gameDisplay, BLUE, (lead_x, top_offset+lead_y, pixel_width, pixel_height))
@@ -298,8 +315,11 @@ while keepGoing:
         lead_x = 0
 
     gameDisplay.blit(pacman, (obj_x*pixel_width+1,top_offset+obj_y*pixel_height+1))
-    gameDisplay.blit(ghost, (ghost_x*pixel_width+2,top_offset+ghost_y*pixel_height+2))
-    #pygame.draw.rect(gameDisplay, RED, (ghost_x*pixel_width+5, top_offset+ghost_y*pixel_height+5, 10, 10))
+    gameDisplay.blit(red_ghost_obj, (new_red_pos[0]*pixel_width+2, top_offset+new_red_pos[1]*pixel_height+2))
+    gameDisplay.blit(yellow_ghost_obj, (new_yellow_pos[0]*pixel_width+2, top_offset+new_yellow_pos[1]*pixel_height+2))
+    gameDisplay.blit(blue_ghost_obj, (new_blue_pos[0]*pixel_width+2, top_offset+new_blue_pos[1]*pixel_height+2))
+    gameDisplay.blit(pink_ghost_obj, (new_pink_pos[0]*pixel_width+2, top_offset+new_pink_pos[1]*pixel_height+2))
+   
     score_text = myfont.render('score: '+ str(score), True, WHITE)
     gameDisplay.blit(score_text,(WINDOW_WIDTH/30, top_offset/5))
     pygame.display.update()
