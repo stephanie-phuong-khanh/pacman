@@ -173,6 +173,8 @@ def maze_to_graph(maze_arr):
             dist += 1
     return graph
 
+
+#TESTING PURPOSES
 if __name__ == '__main__':
     maze_arr = []
     with open('mazes/maze_01.txt', 'r') as maze:

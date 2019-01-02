@@ -1,8 +1,10 @@
 # Pacman
+The classic arcade game, remade with Pygame.
+![Preview](img/preview.png)
 
-## Build
-Python3 is required.
-#### Install dependencies.  
+## Build with Python 3
+#### Install dependencies
 `$ pip3 install -r requirements.txt`
-#### Run.  
+#### Run
 `$ python3 index.py`
+
