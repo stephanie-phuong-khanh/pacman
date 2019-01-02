@@ -1,6 +1,6 @@
 # Pacman
 The classic arcade game, remade with Pygame.
-![Preview](img/preview.png | width=150)
+![](img/preview.png =150x)
 
 ## Build with Python 3
 #### Install dependencies
