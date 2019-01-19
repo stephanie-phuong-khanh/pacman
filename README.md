@@ -1,9 +1,8 @@
-# Pacman
-<img src="img/preview.png" width="350">
+# pacman!
+![](img/demo.gif)
 
-## Build with Python 3
-#### Install dependencies
+## build with python3
+#### install dependencies:
 `$ pip3 install -r requirements.txt`
-#### Run
+#### run (pacman run!)
 `$ python3 index.py`
-
